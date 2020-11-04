@@ -101,9 +101,9 @@ def load_images_and_steering(log_entries):
 
 
 def batch_generator(samples, batch_size=32):
-    num_samples = len(entries)
+    num_samples = len(samples)
     while 1:
-        shuffle(entries)
+        shuffle(samples)
         print('generator looped through all provided samples')
         for offset in range(0, num_samples, batch_size/2):
             current_batch = samples[offset: offset + batch_size/2]
@@ -181,19 +181,19 @@ if __name__ == "__main__":
         samples, test_size=0.3
     )
 
-    print('Number of train entries {:d}'.format(len(train_entries)))
-    print('Number of validation entries {:d}'.format(len(validation_entries)))
+    print('Number of train entries {:d}'.format(len(train_samples)))
+    print('Number of validation entries {:d}'.format(len(validation_samples)))
 
-    training_data_generator = batch_generator(train_entries)
-    validation_data_generator = batch_generator(validation_entries)
+    training_data_generator = batch_generator(train_samples)
+    validation_data_generator = batch_generator(validation_samples)
 
     # model
     nvidia = NvidiaModel()
 
     BATCH_SIZE = 32
 
-    training_batches = ceil(len(train_entries) / BATCH_SIZE)
-    validation_batches = ceil(len(validation_entries) / BATCH_SIZE)
+    training_batches = ceil(len(train_samples) / BATCH_SIZE)
+    validation_batches = ceil(len(validation_samples) / BATCH_SIZE)
 
     nvidia.model.fit_generator(
         training_data_generator,
@@ -204,4 +204,4 @@ if __name__ == "__main__":
         verbose=1,
     )
 
-    nvidia.model.save('model.h5') """
+    nvidia.model.save('model.h5')

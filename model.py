@@ -1,5 +1,4 @@
-from keras.layers import Flatten, Dense
-from keras.models import Sequential
+
 import cv2
 import csv
 import numpy as np
@@ -10,7 +9,10 @@ from math import ceil
 
 from sklearn.model_selection import train_test_split
 from sklearn.utils import shuffle
-from keras.layers import Cropping2D
+
+from keras.models import Sequential, Model
+from keras.layers import Flatten, Dense, Lambda, Convolution2D, Cropping2D
+from keras.layers.pooling import MaxPooling2D
 
 
 class Parameters:
@@ -125,6 +127,34 @@ def batch_generator(entries, batch_size=32, mirror_image=False):
             yield batch
 
 
+class BaseModel:
+    def __init__(self):
+        self.model = Sequential()
+        self.model.add(Lambda(lambda x: (x / 255.0) -
+                              0.5, input_shape=(160, 320, 3)))
+        self.model.add(Cropping2D(cropping=Parameters.CROPPING_DIMS,
+                                  input_shape=Parameters.INPUT_SHAPE))
+
+
+class NvidiaModel(BaseModel):
+    def __init__(self):
+        BaseModel.__init__(self)
+        self.model.add(Convolution2D(
+            24, 5, 5, subsample=(2, 2), activation='relu'))
+        self.model.add(Convolution2D(
+            36, 5, 5, subsample=(2, 2), activation='relu'))
+        self.model.add(Convolution2D(
+            48, 5, 5, subsample=(2, 2), activation='relu'))
+        self.model.add(Convolution2D(64, 3, 3, activation='relu'))
+        self.model.add(Convolution2D(64, 3, 3, activation='relu'))
+        self.model.add(Flatten())
+        self.model.add(Dense(100))
+        self.model.add(Dense(50))
+        self.model.add(Dense(10))
+        self.model.add(Dense(1))
+        self.model.compile(loss='mse', optimizer='adam')
+
+
 if __name__ == "__main__":
 
     entries = read_dataset_entries('data/')
@@ -140,24 +170,20 @@ if __name__ == "__main__":
     validation_data_generator = batch_generator(validation_entries)
 
     # model
-    model = Sequential()
-    model.add(Cropping2D(cropping=Parameters.CROPPING_DIMS,
-                         input_shape=Parameters.INPUT_SHAPE))
-
-    model.add(Flatten(input_shape=(90, 320, 3)))
-    model.add(Dense(1))
-
-    model.compile(loss='mse', optimizer='adam')
+    nvidia = NvidiaModel()
 
     BATCH_SIZE = 32
 
-    model.fit_generator(
+    training_batches = math.ceil(len(train_entries) / BATCH_SIZE)
+    validation_batches = math.ceil(len(validation_entries) / BATCH_SIZE)
+
+    nvidia.model.fit_generator(
         training_data_generator,
         validation_data=validation_data_generator,
-        steps_per_epoch=ceil(len(train_entries) / BATCH_SIZE),
-        validation_steps=ceil(len(validation_entries) / BATCH_SIZE),
+        steps_per_epoch=training_batches,
+        validation_steps=validation_batches,
         epochs=10,
         verbose=1,
     )
 
-    model.save('model.h5')
+    nvidia.model.save('model.h5')

@@ -121,8 +121,8 @@ def batch_generator(entries, batch_size=32, mirror_image=False):
             x_train = np.array(x_train)
             y_train = np.array(y_train)
 
-        batch = shuffle(x_train, y_train)
-        yield batch
+            batch = shuffle(x_train, y_train)
+            yield batch
 
 
 if __name__ == "__main__":

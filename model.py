@@ -7,6 +7,14 @@ import matplotlib.pyplot as plt
 import os
 import sys
 
+from sklearn.model_selection import train_test_split
+from sklearn.utils import shuffle
+from keras.layers import Cropping2D
+
+
+class Parameters:
+    original_image_dimensions{'width': 320, 'height': 160}
+
 
 class LogEntry:
     """
@@ -80,6 +88,38 @@ def load_images_and_steering(log_entries):
     return (np.array(images), np.array(steering_values))
 
 
+def batch_generator(entries, batch_size=32, mirror_image=False):
+    num_entries = len(entries)
+    while 1:
+        shuffle(entries)
+        for offset in range(start=0, stop=num_entries, step=batch_size):
+            batch_entries = entries[offset: offset + batch_size]
+
+            x_train = []
+            y_train = []
+
+            for entry in batch_entries:
+
+                image = cv2.imread(entry.filename_center)
+                image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+                steering = entry.steering
+
+                if mirror_image:
+                    # TODO Check keras tools for data augmentation
+                    image = cv2.flip(image, 1)
+                    steering = -1.0 * steering
+
+                x_train.append(image)
+                y_train.append(steering)
+
+            x_train = np.array(x_train)
+            y_train = np.array(y_train)
+
+        batch = shuffle(x_train, y_train)
+        yield batch
+
+
 if __name__ == "__main__":
 
     entries = read_dataset_entries('data/')
@@ -95,7 +135,9 @@ if __name__ == "__main__":
 
     # model
     model = Sequential()
-    model.add(Flatten(input_shape=(160, 320, 3)))
+    model.add(Cropping2D(cropping=((50, 20), (0, 0)), input_shape=(160, 320, 3)))
+
+    model.add(Flatten(input_shape=(90, 320, 3)))
     model.add(Dense(1))
 	
     print('Compiling model...')

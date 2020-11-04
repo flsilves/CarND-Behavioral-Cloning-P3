@@ -100,13 +100,13 @@ def load_images_and_steering(log_entries):
     return (np.array(images), np.array(steering_values))
 
 
-def batch_generator(samples, batch_size=32, mirror_image=False):
+def batch_generator(samples, batch_size=32):
     num_samples = len(entries)
     while 1:
         shuffle(entries)
         print('generator looped through all provided samples')
-        for offset in range(0, num_samples, batch_size):
-            current_batch = samples[offset: offset + batch_size]
+        for offset in range(0, num_samples, batch_size/2):
+            current_batch = samples[offset: offset + batch_size/2]
 
             x_train = []
             y_train = []
@@ -119,10 +119,11 @@ def batch_generator(samples, batch_size=32, mirror_image=False):
                 image = cv2.imread(image_path)
                 image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
-                if mirror_image:
-                    image = cv2.flip(image, 1)
-                    steering = -1.0 * steering
+                x_train.append(image)
+                y_train.append(steering)
 
+                image = cv2.flip(image, 1)
+                steering = -1.0 * steering
                 x_train.append(image)
                 y_train.append(steering)
 
@@ -199,7 +200,7 @@ if __name__ == "__main__":
         validation_data=validation_data_generator,
         steps_per_epoch=training_batches,
         validation_steps=validation_batches,
-        epochs=10,
+        epochs=3,
         verbose=1,
     )
 

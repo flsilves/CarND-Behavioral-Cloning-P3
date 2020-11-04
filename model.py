@@ -92,15 +92,14 @@ if __name__ == "__main__":
     print('Size of loaded images: {:d} MB'.format(
         sys.getsizeof(x_train) // 2**20))
 
-    plt.figure()
-    plt.imshow(x_train[0])
-    plt.show()
 
     # model
     model = Sequential()
     model.add(Flatten(input_shape=(160, 320, 3)))
     model.add(Dense(1))
-
+	
+    print('Compiling model...')
     model.compile(loss='mse', optimizer='adam')
-    model.fit(x_train, y_train, validation_split=0.2, shuffle=True, nb_epoch=7)
+    print('Model fit...')
+    model.fit(x_train, y_train, validation_split=0.2, shuffle=True, nb_epoch=7, verbose=1)
     model.save('models/data.h5')

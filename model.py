@@ -16,17 +16,14 @@ from keras.layers.pooling import MaxPooling2D
 
 
 class Parameters:
-    original_image_dimensions = {'width': 320, 'height': 160}
-    cropping_pixels = {'top': 50, 'bottom': 20}
-
-    CROPPING_DIMS = ((50, 20), (0, 0))
+    STEERING_CORRECTION = 0.2
+    CROPPING_DIMS = ((70, 25), (0, 0))
     INPUT_SHAPE = (160, 320, 3)
 
 
 class LogEntry:
     """
     Holds the cell values corresponding to a single row on 'driving_log.csv'
-
     """
 
     def __init__(self, line, img_directory_path):
@@ -51,6 +48,14 @@ class LogEntry:
                 + "\t break: '{:f}'\n".format(self.break_value)
                 + "\t speed: '{:f}'\n".format(self.speed)
                 )
+
+    def get_samples(self):
+        image_paths = (self.filename_left,
+                       self.filename_center, self.filename_right)
+        steering_values = (self.steering + Parameters.STEERING_CORRECTION,
+                           self.steering, self.steering - Parameters.STEERING_CORRECTION)
+
+        return list(zip(image_paths, steering_values))
 
 
 def read_dataset_entries(data_folder_path='data/', skip_header=True):
@@ -95,25 +100,26 @@ def load_images_and_steering(log_entries):
     return (np.array(images), np.array(steering_values))
 
 
-def batch_generator(entries, batch_size=32, mirror_image=False):
-    num_entries = len(entries)
+def batch_generator(samples, batch_size=32, mirror_image=False):
+    num_samples = len(entries)
     while 1:
         shuffle(entries)
-        for offset in range(0, num_entries, batch_size):
-            batch_entries = entries[offset: offset + batch_size]
+        print('generator looped through all provided samples')
+        for offset in range(0, num_samples, batch_size):
+            current_batch = samples[offset: offset + batch_size]
 
             x_train = []
             y_train = []
 
-            for entry in batch_entries:
+            for single_sample in current_batch:
 
-                image = cv2.imread(entry.filename_center)
+                image_path = single_sample[0]
+                steering = single_sample[1]
+
+                image = cv2.imread(image_path)
                 image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
-                steering = entry.steering
-
                 if mirror_image:
-                    # TODO Check keras tools for data augmentation
                     image = cv2.flip(image, 1)
                     steering = -1.0 * steering
 
@@ -123,8 +129,7 @@ def batch_generator(entries, batch_size=32, mirror_image=False):
             x_train = np.array(x_train)
             y_train = np.array(y_train)
 
-            batch = shuffle(x_train, y_train)
-            yield batch
+            yield shuffle(x_train, y_train)
 
 
 class BaseModel:
@@ -155,12 +160,24 @@ class NvidiaModel(BaseModel):
         self.model.compile(loss='mse', optimizer='adam')
 
 
+def read_samples_from_csv(data_path):
+    """ Return a list of samples [(image_filepath, steering_value), ...] based on driving_log.csv """
+    """ Each entry or row gives three samples (left, center, right) cameras """
+    csv_log_entries = read_dataset_entries(data_path)
+    samples = []
+
+    for entry in csv_log_entries:
+        samples.extend(entry.get_samples())
+
+    return samples
+
+
 if __name__ == "__main__":
 
-    entries = read_dataset_entries('data/')
+    samples = read_samples_from_csv('data/')
 
-    train_entries, validation_entries = train_test_split(
-        entries, test_size=0.3
+    train_samples, validation_samples = train_test_split(
+        samples, test_size=0.3
     )
 
     print('Number of train entries {:d}'.format(len(train_entries)))
@@ -174,8 +191,8 @@ if __name__ == "__main__":
 
     BATCH_SIZE = 32
 
-    training_batches = math.ceil(len(train_entries) / BATCH_SIZE)
-    validation_batches = math.ceil(len(validation_entries) / BATCH_SIZE)
+    training_batches = ceil(len(train_entries) / BATCH_SIZE)
+    validation_batches = ceil(len(validation_entries) / BATCH_SIZE)
 
     nvidia.model.fit_generator(
         training_data_generator,
@@ -186,4 +203,4 @@ if __name__ == "__main__":
         verbose=1,
     )
 
-    nvidia.model.save('model.h5')
+    nvidia.model.save('model.h5') """

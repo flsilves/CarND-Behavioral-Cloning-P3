@@ -6,6 +6,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 import sys
+from math import ceil
 
 from sklearn.model_selection import train_test_split
 from sklearn.utils import shuffle
@@ -13,7 +14,11 @@ from keras.layers import Cropping2D
 
 
 class Parameters:
-    original_image_dimensions{'width': 320, 'height': 160}
+    original_image_dimensions = {'width': 320, 'height': 160}
+    cropping_pixels = {'top': 50, 'bottom': 20}
+
+    CROPPING_DIMS = ((50, 20), (0, 0))
+    INPUT_SHAPE = (160, 320, 3)
 
 
 class LogEntry:
@@ -92,7 +97,7 @@ def batch_generator(entries, batch_size=32, mirror_image=False):
     num_entries = len(entries)
     while 1:
         shuffle(entries)
-        for offset in range(start=0, stop=num_entries, step=batch_size):
+        for offset in range(0, num_entries, batch_size):
             batch_entries = entries[offset: offset + batch_size]
 
             x_train = []
@@ -124,24 +129,35 @@ if __name__ == "__main__":
 
     entries = read_dataset_entries('data/')
 
-    print(str(entries[0]))
-    print(len(entries))
+    train_entries, validation_entries = train_test_split(
+        entries, test_size=0.3
+    )
 
-    x_train, y_train = load_images_and_steering(entries)
+    print('Number of train entries {:d}'.format(len(train_entries)))
+    print('Number of validation entries {:d}'.format(len(validation_entries)))
 
-    print('Size of loaded images: {:d} MB'.format(
-        sys.getsizeof(x_train) // 2**20))
-
+    training_data_generator = batch_generator(train_entries)
+    validation_data_generator = batch_generator(validation_entries)
 
     # model
     model = Sequential()
-    model.add(Cropping2D(cropping=((50, 20), (0, 0)), input_shape=(160, 320, 3)))
+    model.add(Cropping2D(cropping=Parameters.CROPPING_DIMS,
+                         input_shape=Parameters.INPUT_SHAPE))
 
     model.add(Flatten(input_shape=(90, 320, 3)))
     model.add(Dense(1))
-	
-    print('Compiling model...')
+
     model.compile(loss='mse', optimizer='adam')
-    print('Model fit...')
-    model.fit(x_train, y_train, validation_split=0.2, shuffle=True, nb_epoch=7, verbose=1)
-    model.save('models/data.h5')
+
+    BATCH_SIZE = 32
+
+    model.fit_generator(
+        training_data_generator,
+        validation_data=validation_data_generator,
+        steps_per_epoch=ceil(len(train_entries) / BATCH_SIZE),
+        validation_steps=ceil(len(validation_entries) / BATCH_SIZE),
+        epochs=10,
+        verbose=1,
+    )
+
+    model.save('model.h5')

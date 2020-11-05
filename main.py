@@ -20,6 +20,7 @@ def batch_generator(samples, batch_size=Parameters.BATCH_SIZE):
     Each sample produces two images, the step is hence 'batch_size//2' 
 
     """
+    assert batch_size % 2 == 0, 'batch_size should be an even number'
 
     num_samples = len(samples)
     while 1:

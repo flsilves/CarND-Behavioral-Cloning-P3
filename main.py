@@ -3,6 +3,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import logging
+import cv2
 
 from math import ceil
 from sklearn.model_selection import train_test_split
@@ -22,8 +23,6 @@ def batch_generator(samples, batch_size=Parameters.BATCH_SIZE):
 
     num_samples = len(samples)
     while 1:
-        logging.debug(
-            'Generator looped through all provided samples, shuffling...')
         shuffle(samples)
         for offset in range(0, num_samples, batch_size//2):
             current_batch = samples[offset: offset + batch_size//2]
@@ -51,6 +50,9 @@ def batch_generator(samples, batch_size=Parameters.BATCH_SIZE):
             y_train = np.array(y_train)
 
             yield shuffle(x_train, y_train)
+
+        logging.debug(
+            'Generator looped through all provided samples, shuffling...')
 
 
 if __name__ == "__main__":

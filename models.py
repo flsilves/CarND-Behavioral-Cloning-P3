@@ -27,13 +27,13 @@ class NvidiaModel(BaseModel):
     def __init__(self):
         BaseModel.__init__(self)
         self.model.add(Convolution2D(
-            24, 5, 5, subsample=(2, 2), activation='relu'))
+            24, (5, 5), strides=(2, 2), activation="relu"))
         self.model.add(Convolution2D(
-            36, 5, 5, subsample=(2, 2), activation='relu'))
+            36, (5, 5), strides=(2, 2), activation="relu"))
         self.model.add(Convolution2D(
-            48, 5, 5, subsample=(2, 2), activation='relu'))
-        self.model.add(Convolution2D(64, 3, 3, activation='relu'))
-        self.model.add(Convolution2D(64, 3, 3, activation='relu'))
+            48, (5, 5), strides=(2, 2), activation="relu"))
+        self.model.add(Convolution2D(64, (3, 3), activation="relu"))
+        self.model.add(Convolution2D(64, (3, 3), activation="relu"))
         self.model.add(Flatten())
         self.model.add(Dense(100))
         self.model.add(Dense(50))

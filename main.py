@@ -2,13 +2,14 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
+import logging
 
 from math import ceil
 from sklearn.model_selection import train_test_split
 from sklearn.utils import shuffle
 
 from parameters import Parameters
-from model import NvidiaModel
+from models import NvidiaModel
 from data_reader import read_samples_from_csv
 
 
@@ -21,7 +22,8 @@ def batch_generator(samples, batch_size=Parameters.BATCH_SIZE):
 
     num_samples = len(samples)
     while 1:
-        print('Generator looped through all provided samples, shuffling...')
+        logging.debug(
+            'Generator looped through all provided samples, shuffling...')
         shuffle(samples)
         for offset in range(0, num_samples, batch_size//2):
             current_batch = samples[offset: offset + batch_size//2]
@@ -52,20 +54,22 @@ def batch_generator(samples, batch_size=Parameters.BATCH_SIZE):
 
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.DEBUG, format='%(message)s')
 
     samples = []
 
     for data_folder in Parameters.DATASET_FOLDERS:
         samples.extend(read_samples_from_csv(data_folder))
 
-    print('size of data {:d}'.format(len(samples)))
+    logging.info('size of data {:d}'.format(len(samples)))
 
     train_samples, validation_samples = train_test_split(
         samples, test_size=Parameters.TEST_SIZE_PERCENTAGE
     )
 
-    print('Number of train samples {:d}'.format(len(train_samples)))
-    print('Number of validation samples {:d}'.format(len(validation_samples)))
+    logging.info('Number of train samples {:d}'.format(len(train_samples)))
+    logging.info('Number of validation samples {:d}'.format(
+        len(validation_samples)))
 
     batch_size = Parameters.BATCH_SIZE
 

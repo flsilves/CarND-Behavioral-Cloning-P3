@@ -2,6 +2,7 @@
 
 import os
 import csv
+import logging
 
 from parameters import Parameters
 
@@ -52,7 +53,7 @@ def read_dataset_entries(data_folder_path, skip_header=False):
     img_directory_path = os.path.join(data_folder_path, "IMG/")
     csv_file_path = os.path.join(data_folder_path, "driving_log.csv")
 
-    print("Reading entries from: {:s} with skip_header={:b}:".format(
+    logging.debug("Reading entries from: {:s} with skip_header={:b}:".format(
         csv_file_path, skip_header))
 
     entries = []
@@ -65,7 +66,7 @@ def read_dataset_entries(data_folder_path, skip_header=False):
         for line in reader:
             entries.append(LogEntry(line, img_directory_path))
 
-    print("Read {:d} entries".format(len(entries)))
+    logging.debug("Read {:d} entries".format(len(entries)))
     return entries
 
 

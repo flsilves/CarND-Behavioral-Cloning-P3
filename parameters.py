@@ -5,7 +5,7 @@ class Parameters:
     BATCH_SIZE = 32
     EPOCHS = 3
 
-    TEST_SIZE_PERCENTAGE = 0.3
+    TEST_SIZE_PERCENTAGE = 0.2
 
     # Input shape of the original camera images (height, width, color layers)
     INPUT_SHAPE = (160, 320, 3)
@@ -17,7 +17,7 @@ class Parameters:
     CROPPING_DIMS = ((70, 25), (0, 0))
 
     DATASET_FOLDERS = [
-        "data/provided/",
+        # "data/provided/",
         "data/track1_center/",
         "data/track1_reverse/",
         "data/track1_right/",

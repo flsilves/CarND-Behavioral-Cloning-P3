@@ -1,4 +1,4 @@
-""" Main Module """
+""" Training module """
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -57,7 +57,7 @@ def batch_generator(samples, batch_size=Parameters.BATCH_SIZE):
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.DEBUG, format='%(message)s')
+    logging.basicConfig(level=logging.INFO, format='%(message)s')
 
     samples = []
 
@@ -84,7 +84,6 @@ if __name__ == "__main__":
     nvidia = NvidiaModel()
 
     # Each sample produces 2 samples because of data augmentation in the generator (horizonal mirror)
-    #
     training_batches = ceil(2*len(train_samples) / batch_size)
     validation_batches = ceil(2*len(validation_samples) / batch_size)
 

@@ -7,9 +7,7 @@ from parameters import Parameters
 
 
 class LogEntry:
-    """
-    Stores the collumn values corresponding to a single row in 'driving_log.csv'
-    """
+    """  Stores the collumn values corresponding to a single row in 'driving_log.csv' """
 
     def __init__(self, line, img_directory_path):
         self.filename_center = os.path.join(
@@ -35,7 +33,7 @@ class LogEntry:
                 )
 
     def get_samples(self):
-        """ Gets a list of three tuples '(image_filepath, steering)' from the single entry"""
+        """  Gets a list of three tuples '(image_filepath, steering)' from the single entry """
         image_paths = (self.filename_left,
                        self.filename_center, self.filename_right)
         steering_values = (self.steering + Parameters.STEERING_CORRECTION,
@@ -47,7 +45,6 @@ class LogEntry:
 def read_dataset_entries(data_folder_path, skip_header=False):
     """
     Reads 'driving_log.csv' and returns a list of LogEntry(s) holding the cell values
-
     'skip_header': is used to ignore the first line of the csv file
 
     """
@@ -73,8 +70,11 @@ def read_dataset_entries(data_folder_path, skip_header=False):
 
 
 def read_samples_from_csv(data_path):
-    """ Return a list of samples [(image_filepath, steering_value), ...] from 'driving_log.csv' """
-    """ Each entry/row gives produces 3 samples corresponding to the (left, center, right) images """
+    """ 
+    Return a list of samples [(image_filepath, steering_value), ...] from 'driving_log.csv' 
+    Each entry/row gives produces 3 samples corresponding to the (left, center, right) images 
+
+    """
     csv_log_entries = read_dataset_entries(data_path)
     samples = []
 

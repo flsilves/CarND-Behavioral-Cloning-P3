@@ -20,7 +20,7 @@ class BaseModel:
 
 
 class NvidiaModel(BaseModel):
-    """ Nvidia model based on ... """
+    """  Nvidia model  """
 
     def __init__(self):
         BaseModel.__init__(self)

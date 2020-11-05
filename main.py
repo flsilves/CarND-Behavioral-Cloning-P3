@@ -13,8 +13,11 @@ from data_reader import read_samples_from_csv
 
 
 def batch_generator(samples, batch_size=Parameters.BATCH_SIZE):
-    """ Batch generator with data augmentation by mirroring the image horizontally """
-    """ Each sample produces two images, the step is hence 'batch_size//2' """
+    """ 
+    Batch generator with data augmentation by mirroring the image horizontally 
+    Each sample produces two images, the step is hence 'batch_size//2' 
+
+    """
 
     num_samples = len(samples)
     while 1:

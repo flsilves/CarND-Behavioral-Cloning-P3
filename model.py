@@ -20,6 +20,16 @@ class Parameters:
     CROPPING_DIMS = ((70, 25), (0, 0))
     INPUT_SHAPE = (160, 320, 3)
 
+    DATASET_FOLDERS = [
+        "data/provided/",
+        "data/track1_center/",
+        "data/track1_reverse/",
+        "data/track1_right/",
+        "data/track1_left/",
+        "data/track2_center/",
+        "data/track2_reverse/",
+    ]
+
 
 class LogEntry:
     """
@@ -58,7 +68,7 @@ class LogEntry:
         return list(zip(image_paths, steering_values))
 
 
-def read_dataset_entries(data_folder_path='data/', skip_header=True):
+def read_dataset_entries(data_folder_path, skip_header=True):
     """
     Reads 'driving_log.csv' and returns a list of LogEntry(s) holding the cell values
 
@@ -175,7 +185,12 @@ def read_samples_from_csv(data_path):
 
 if __name__ == "__main__":
 
-    samples = read_samples_from_csv('data/')
+    samples = []
+
+    for data_folder in Parameters.DATASET_FOLDERS:
+        samples.extend(read_samples_from_csv(data_folder))
+
+    print('size of data {:d}'.format(len(samples)))
 
     train_samples, validation_samples = train_test_split(
         samples, test_size=0.3

@@ -20,7 +20,9 @@ class BaseModel:
 
 
 class NvidiaModel(BaseModel):
-    """  Nvidia model  """
+    """  Nvidia model based on:
+         https://developer.nvidia.com/blog/deep-learning-self-driving-cars/
+    """
 
     def __init__(self):
         BaseModel.__init__(self)

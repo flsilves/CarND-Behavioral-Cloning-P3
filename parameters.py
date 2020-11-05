@@ -7,6 +7,15 @@ class Parameters:
 
     TEST_SIZE_PERCENTAGE = 0.3
 
+    # Input shape of the original camera images (height, width, color layers)
+    INPUT_SHAPE = (160, 320, 3)
+
+    # Steering correction value for left (+) and right (-) images
+    STEERING_CORRECTION = 0.2
+
+    # Pixels to crop in pre-processing: ((top, bottom),(left,right))
+    CROPPING_DIMS = ((70, 25), (0, 0))
+
     DATASET_FOLDERS = [
         "data/provided/",
         "data/track1_center/",
@@ -16,7 +25,3 @@ class Parameters:
         "data/track2_center/",
         "data/track2_reverse/",
     ]
-
-    INPUT_SHAPE = (160, 320, 3)
-    STEERING_CORRECTION = 0.2
-    CROPPING_DIMS = ((70, 25), (0, 0))

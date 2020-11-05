@@ -15,7 +15,7 @@ class BaseModel:
         self.model = Sequential()
         self.model.add(Lambda(lambda x: (x / 255.0) -
                               0.5, input_shape=(160, 320, 3)))
-        self.model.add(Cropping2D(cropping=Parameters.CROPPING_DIMS,
+        self.model.add(Cropping2D(cropping=Parameters.CROPPING_DIMENSIONS,
                                   input_shape=Parameters.INPUT_SHAPE))
 
 

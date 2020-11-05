@@ -67,7 +67,7 @@ if __name__ == "__main__":
     logging.info('size of data {:d}'.format(len(samples)))
 
     train_samples, validation_samples = train_test_split(
-        samples, test_size=Parameters.TEST_SIZE_PERCENTAGE
+        samples, test_size=Parameters.TEST_SIZE_FRACTION
     )
 
     logging.info('Number of train samples {:d}'.format(len(train_samples)))

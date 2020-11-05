@@ -4,8 +4,7 @@
 class Parameters:
     BATCH_SIZE = 32
     EPOCHS = 3
-
-    TEST_SIZE_PERCENTAGE = 0.2
+    TEST_SIZE_FRACTION = 0.2
 
     # Input shape of the original camera images (height, width, color layers)
     INPUT_SHAPE = (160, 320, 3)
@@ -14,7 +13,7 @@ class Parameters:
     STEERING_CORRECTION = 0.2
 
     # Pixels to crop in pre-processing: ((top, bottom),(left,right))
-    CROPPING_DIMS = ((70, 25), (0, 0))
+    CROPPING_DIMENSIONS = ((70, 25), (0, 0))
 
     DATASET_FOLDERS = [
         # "data/provided/",

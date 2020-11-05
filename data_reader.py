@@ -1,3 +1,5 @@
+""" Parses driving log to provide x_train, y_train data """
+
 import os
 import csv
 
@@ -68,3 +70,15 @@ def read_dataset_entries(data_folder_path, skip_header=False):
 
     print("Read {:d} entries".format(len(entries)))
     return entries
+
+
+def read_samples_from_csv(data_path):
+    """ Return a list of samples [(image_filepath, steering_value), ...] from 'driving_log.csv' """
+    """ Each entry/row gives produces 3 samples corresponding to the (left, center, right) images """
+    csv_log_entries = read_dataset_entries(data_path)
+    samples = []
+
+    for entry in csv_log_entries:
+        samples.extend(entry.get_samples())
+
+    return samples

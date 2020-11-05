@@ -1,9 +1,11 @@
-""" Parameters class """
+""" Parameters """
 
 
 class Parameters:
     BATCH_SIZE = 32
     EPOCHS = 3
+
+    TEST_SIZE_PERCENTAGE = 0.3
 
     DATASET_FOLDERS = [
         "data/provided/",

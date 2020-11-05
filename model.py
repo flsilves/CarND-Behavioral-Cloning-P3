@@ -1,10 +1,12 @@
 
-import cv2
-import csv
-import numpy as np
-import matplotlib.pyplot as plt
 import os
 import sys
+import cv2
+import csv
+
+import numpy as np
+import matplotlib.pyplot as plt
+
 from math import ceil
 
 from sklearn.model_selection import train_test_split
@@ -14,26 +16,12 @@ from keras.models import Sequential, Model
 from keras.layers import Flatten, Dense, Lambda, Convolution2D, Cropping2D
 from keras.layers.pooling import MaxPooling2D
 
-
-class Parameters:
-    STEERING_CORRECTION = 0.2
-    CROPPING_DIMS = ((70, 25), (0, 0))
-    INPUT_SHAPE = (160, 320, 3)
-
-    DATASET_FOLDERS = [
-        "data/provided/",
-        "data/track1_center/",
-        "data/track1_reverse/",
-        "data/track1_right/",
-        "data/track1_left/",
-        "data/track2_center/",
-        "data/track2_reverse/",
-    ]
+from parameters import Parameters
 
 
 class LogEntry:
     """
-    Holds the cell values corresponding to a single row on 'driving_log.csv'
+    Stores the collumn values corresponding to a single row in 'driving_log.csv'
     """
 
     def __init__(self, line, img_directory_path):
@@ -60,6 +48,7 @@ class LogEntry:
                 )
 
     def get_samples(self):
+        """ Gets a list of three tuples '(image_filepath, steering)' from the single entry"""
         image_paths = (self.filename_left,
                        self.filename_center, self.filename_right)
         steering_values = (self.steering + Parameters.STEERING_CORRECTION,
@@ -68,7 +57,7 @@ class LogEntry:
         return list(zip(image_paths, steering_values))
 
 
-def read_dataset_entries(data_folder_path, skip_header=True):
+def read_dataset_entries(data_folder_path, skip_header=False):
     """
     Reads 'driving_log.csv' and returns a list of LogEntry(s) holding the cell values
 
@@ -96,27 +85,16 @@ def read_dataset_entries(data_folder_path, skip_header=True):
     return entries
 
 
-def load_images_and_steering(log_entries):
-    """
-
-    """
-    images = []
-    steering_values = []
-    for entry in log_entries:
-        image = cv2.imread(entry.filename_center)
-        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        images.append(image)
-        steering_values.append(entry.steering)
-    return (np.array(images), np.array(steering_values))
-
-
 def batch_generator(samples, batch_size=32):
+    """ Batch generator with data augmentation by mirroring the image horizontally """
+    """ Each sample produces two images, the step is hence 'batch_size//2' """
+
     num_samples = len(samples)
     while 1:
+        print('Generator looped through all provided samples, shuffling...')
         shuffle(samples)
-        print('generator looped through all provided samples')
-        for offset in range(0, num_samples, batch_size/2):
-            current_batch = samples[offset: offset + batch_size/2]
+        for offset in range(0, num_samples, batch_size//2):
+            current_batch = samples[offset: offset + batch_size//2]
 
             x_train = []
             y_train = []
@@ -144,6 +122,8 @@ def batch_generator(samples, batch_size=32):
 
 
 class BaseModel:
+    """ Base model with normalization of image values and image cropping """
+
     def __init__(self):
         self.model = Sequential()
         self.model.add(Lambda(lambda x: (x / 255.0) -
@@ -153,6 +133,8 @@ class BaseModel:
 
 
 class NvidiaModel(BaseModel):
+    """ Nvidia model based on ... """
+
     def __init__(self):
         BaseModel.__init__(self)
         self.model.add(Convolution2D(
@@ -172,8 +154,8 @@ class NvidiaModel(BaseModel):
 
 
 def read_samples_from_csv(data_path):
-    """ Return a list of samples [(image_filepath, steering_value), ...] based on driving_log.csv """
-    """ Each entry or row gives three samples (left, center, right) cameras """
+    """ Return a list of samples [(image_filepath, steering_value), ...] from 'driving_log.csv' """
+    """ Each entry/row gives produces 3 samples corresponding to the (left, center, right) images """
     csv_log_entries = read_dataset_entries(data_path)
     samples = []
 
@@ -196,26 +178,29 @@ if __name__ == "__main__":
         samples, test_size=0.3
     )
 
-    print('Number of train entries {:d}'.format(len(train_samples)))
-    print('Number of validation entries {:d}'.format(len(validation_samples)))
+    print('Number of train samples {:d}'.format(len(train_samples)))
+    print('Number of validation samples {:d}'.format(len(validation_samples)))
 
-    training_data_generator = batch_generator(train_samples)
-    validation_data_generator = batch_generator(validation_samples)
+    batch_size = Parameters.BATCH_SIZE
 
-    # model
+    training_data_generator = batch_generator(
+        train_samples, batch_size)
+    validation_data_generator = batch_generator(
+        validation_samples, batch_size)
+
     nvidia = NvidiaModel()
 
-    BATCH_SIZE = 32
-
-    training_batches = ceil(len(train_samples) / BATCH_SIZE)
-    validation_batches = ceil(len(validation_samples) / BATCH_SIZE)
+    # Each sample produces 2 samples because of data augmentation (horizonal mirror)
+    # The number of batches
+    training_batches = ceil(2*len(train_samples) / batch_size)
+    validation_batches = ceil(2*len(validation_samples) / batch_size)
 
     nvidia.model.fit_generator(
         training_data_generator,
         validation_data=validation_data_generator,
         steps_per_epoch=training_batches,
         validation_steps=validation_batches,
-        epochs=3,
+        epochs=Parameters.EPOCHS,
         verbose=1,
     )
 

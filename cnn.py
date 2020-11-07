@@ -2,7 +2,7 @@
 """ Convolutional neural network models """
 
 from keras.models import Sequential, Model
-from keras.layers import Flatten, Dense, Lambda, Convolution2D, Cropping2D, Dropout, ReLU
+from keras.layers import Flatten, Dense, Lambda, Convolution2D, Cropping2D, Dropout
 from keras.layers.pooling import MaxPooling2D
 
 from parameters import Parameters

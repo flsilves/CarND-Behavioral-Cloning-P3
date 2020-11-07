@@ -40,25 +40,3 @@ class NvidiaModel(BaseModel):
         self.model.add(Dense(10))
         self.model.add(Dense(1))
         self.model.compile(loss='mse', optimizer='adam')
-
-
-class CommaAI(BaseModel):
-    """
-    """
-
-    def __init__(self):
-        BaseModel.__init__(self)
-        self.model.add(Convolution2D(
-            16, (8, 8), strides=(4, 4), activation='relu'))
-        self.model.add(Convolution2D(
-            32, (5, 5), strides=(2, 2), activation="relu"))
-        self.model.add(Convolution2D(
-            64, (5, 5), strides=(2, 2)))
-        self.model.add(Flatten())
-        self.model.add(Dropout(.2))
-        self.model.add(ReLU())
-        self.model.add(Dense(512))
-        self.model.add(Dropout(.5))
-        self.model.add(ReLU())
-        self.model.add(Dense(1))
-        self.model.compile(loss='mse', optimizer='adam')

@@ -1,17 +1,15 @@
 """ Training module """
-import datetime
 import numpy as np
 import matplotlib.pyplot as plt
 import logging
 import cv2
-import datetime
 
 from math import ceil
 from sklearn.model_selection import train_test_split
 from sklearn.utils import shuffle
 
 from parameters import Parameters
-from cnn import NvidiaModel, CommaAI
+from cnn import NvidiaModel
 from data_reader import read_samples_from_csv
 
 
@@ -68,15 +66,6 @@ if __name__ == "__main__":
 
     logging.info('* Size of data {:d}'.format(len(samples)))
 
-    # plt.figure()
-    #data = [float(x[1]) for x in samples]
-    #plt.hist(data, bins='auto')
-    #plt.title("Training dataset w/o data augmentation")
-    #plt.xlabel('Steering angle normalized (1.0=25 deg)')
-    # plt.ylabel('Count')
-    #plt.grid(True, linestyle='--')
-    # plt.show()
-
     train_samples, validation_samples = train_test_split(
         samples, test_size=Parameters.TEST_SIZE_FRACTION
     )
@@ -99,8 +88,6 @@ if __name__ == "__main__":
     training_batches = ceil(2*len(train_samples) / batch_size)
     validation_batches = ceil(2*len(validation_samples) / batch_size)
 
-    # nvidia.model.summary()
-
     fitting_data = nvidia.model.fit_generator(
         training_data_generator,
         validation_data=validation_data_generator,
@@ -109,14 +96,5 @@ if __name__ == "__main__":
         epochs=Parameters.EPOCHS,
         verbose=1,
     )
-
-    # MSE evolution during model fit
-    # plt.plot(fitting_data.history['loss'], 'o--')
-    # plt.plot(fitting_data.history['val_loss'], 'o--')
-    # plt.title('model mean squared error loss')
-    # plt.ylabel('mean squared error loss')
-    # plt.xlabel('epoch')
-    # plt.legend(['training set', 'validation set'], loc='upper right')
-    # plt.show()
 
     nvidia.model.save('model.h5')
